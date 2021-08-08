@@ -4,17 +4,20 @@ document.addEventListener('alpine:init', () => {
   Alpine.data('minits', (id) => ({
     text: null,
     start: null,
-    minutes: [],
+    records: [],
+    currentTime: DateTime.now(),
 
     async init() {
       const response = await fetch(`/${id}/minutes.json`)
-      const minits = await response.json()
+      const minutes = await response.json()
 
-      this.start = minits.start ? DateTime.fromISO(minits.start) : DateTime.now()
-      this.minutes = minits.minutes.map((minute) => {
-        minute.time = DateTime.fromISO(minute.time)
-        return minute
+      this.start = DateTime.fromISO(minutes.start)
+      this.records = minutes.records.map((record) => {
+        record.time = DateTime.fromISO(record.time)
+        return record
       })
+
+      setInterval(() => this.tick(), 1000)
 
       this.sync().catch(console.error)
     },
@@ -22,21 +25,31 @@ document.addEventListener('alpine:init', () => {
     async record() {
       if (!this.text) return
 
-      this.minutes.push({ time: DateTime.now(), text: this.text })
+      this.records.push({ time: DateTime.now(), text: this.text })
       this.text = null
 
       this.sync().catch(console.error)
     },
 
-    offsetString(time) {
+    async sync() {
+      await fetch(`/${id}/sync`, {
+        method: 'POST',
+        body: JSON.stringify({ start: this.start, records: this.records })
+      })
+    },
+
+    formatOffset(time) {
       return time.diff(this.start).toFormat('mm:ss')
     },
 
-    async sync() {
-      await fetch(`/${id}/sync.json`, {
-        method: 'POST',
-        body: JSON.stringify({ start: this.start, minutes: this.minutes })
-      })
+    tick() {
+      this.currentTime = DateTime.now()
+    },
+
+    getCurrentOffset() {
+      if (!this.start) return null
+
+      return this.formatOffset(this.currentTime)
     }
   }))
 })

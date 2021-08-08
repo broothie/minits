@@ -3,46 +3,68 @@ require 'sinatra'
 require 'sinatra/json'
 require 'sinatra/reloader' if development?
 require 'json'
+require 'time'
 require 'stringio'
 require 'google/cloud/firestore'
 
-db = Google::Cloud::Firestore.new(project: 'minits').collection('minits')
+enable :sessions
+
+before do
+  session[:recent] ||= []
+end
 
 get '/' do
-  id = SecureRandom.urlsafe_base64(6)
-  db.doc(id).set({ minutes: [] })
+  erb :'index.html'
+end
 
+get '/new' do
+  id = SecureRandom.urlsafe_base64(6)
+  db.doc(id).set({ start: Time.now.iso8601, records: [] })
+
+  cache_control :no_cache
   redirect "/#{id}"
 end
 
 get '/:id' do |id|
+  session[:recent] << id unless session[:recent].include?(id)
+
   @id = id
   erb :'minits.html'
+end
+
+post '/:id/sync' do |id|
+  request.body.rewind
+  minutes = JSON.parse(request.body.read)
+  db.doc(id).set(minutes)
+
+  status :ok
 end
 
 get '/:id/minutes.json' do |id|
   json db.doc(id).get.data
 end
 
-post '/:id/sync.json' do |id|
-  request.body.rewind
-  minits = JSON.parse(request.body.read)
-  db.doc(id).set(minits)
-
-  status :ok
-end
-
-get '/:id/raw.txt' do |id|
-  minits = db.doc(id).get.data
-  start = Time.parse(minits[:start])
+get '/:id/minutes.txt' do |id|
+  minutes = db.doc(id).get.data
+  start = Time.parse(minutes[:start])
 
   txt = StringIO.new
-  minits[:minutes].each do |minute|
+  minutes[:records].each do |minute|
     time = Time.parse(minute[:time])
     diff = (time - start).floor
-    txt.puts "#{(diff / 60).to_s.rjust(2, '0')}:#{(diff % 60).to_s.rjust(2, '0')} #{minute[:text]}"
+    txt.puts "#{format_offset(diff)} #{minute[:text]}"
   end
 
   content_type 'text/plain'
   txt.string
+end
+
+helpers do
+  def db
+    @db ||= Google::Cloud::Firestore.new(project: 'minits').collection('minutes')
+  end
+
+  def format_offset(diff)
+    "#{(diff / 60).to_s.rjust(2, '0')}:#{(diff % 60).to_s.rjust(2, '0')}"
+  end
 end
