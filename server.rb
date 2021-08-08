@@ -12,6 +12,7 @@ set session_secret: ENV.fetch('SESSION_SECRET') { |key| production? ? raise(KeyE
 
 before do
   session[:recent] ||= []
+  session[:recent].delete('favicon.ico') # HACK
 end
 
 get '/' do
@@ -30,7 +31,7 @@ get '/:id' do |id|
   session[:recent] << id unless session[:recent].include?(id)
 
   @id = id
-  erb :'minits.html'
+  erb :'minutes.html'
 end
 
 post '/:id/sync' do |id|

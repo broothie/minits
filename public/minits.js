@@ -4,6 +4,7 @@ document.addEventListener('alpine:init', () => {
   Alpine.data('minits', (id) => ({
     text: null,
     start: null,
+    status: 'saved',
     records: [],
     currentTime: DateTime.now(),
 
@@ -18,8 +19,6 @@ document.addEventListener('alpine:init', () => {
       })
 
       setInterval(() => this.tick(), 1000)
-
-      this.sync().catch(console.error)
     },
 
     async record() {
@@ -28,14 +27,19 @@ document.addEventListener('alpine:init', () => {
       this.records.push({ time: DateTime.now(), text: this.text })
       this.text = null
 
+      this.status = 'not saved'
       this.sync().catch(console.error)
     },
 
     async sync() {
-      await fetch(`/${id}/sync`, {
+      this.status = 'saving'
+
+      const response = await fetch(`/${id}/sync`, {
         method: 'POST',
         body: JSON.stringify({ start: this.start, records: this.records })
       })
+
+      if (response.ok) this.status = 'saved'
     },
 
     formatOffset(time) {
