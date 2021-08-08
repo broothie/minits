@@ -1,9 +1,20 @@
-<div class="min-vh-100 d-flex flex-column justify-content-center align-items-center">
-  <div>
-    <h3>minits</h3>
-    <div><a href="/new">new</a></div>
-    <% session[:recent].each do |id| %>
-      <div><a href="/<%= id %>"><%= id %></a></div>
+<nav class="navbar fixed-top">
+  <div class="container">
+    <p><a href="/">minits</a></p>
+  </div>
+</nav>
+
+<div class="min-vh-100 container d-flex flex-column justify-content-center align-items-center">
+  <div class="row">
+    <a href="/new" class="btn btn-primary btn-sm mb-3">new</a>
+
+    <% if session[:recent].any? %>
+      <div class="d-flex flex-column">
+        <strong class="m-0">recents</strong>
+        <% session[:recent].each do |id| %>
+          <a href="/<%= id %>"><%= id %></a>
+        <% end %>
+      </div>
     <% end %>
   </div>
 </div>

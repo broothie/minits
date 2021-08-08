@@ -8,6 +8,7 @@ require 'stringio'
 require 'google/cloud/firestore'
 
 enable :sessions
+set session_secret: ENV.fetch('SESSION_SECRET') { |key| production? ? raise(KeyError, key) : 'asdf' }
 
 before do
   session[:recent] ||= []
