@@ -1,0 +1,9 @@
+version: '3.2'
+
+services:
+  firestore:
+    image: mtlynch/firestore-emulator:20210410
+    environment:
+      FIRESTORE_PROJECT_ID: dodo
+      PORT: 8200
+    ports: [8200:8200]
