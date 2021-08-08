@@ -4,6 +4,7 @@ require 'sinatra/json'
 require 'sinatra/reloader' if development?
 require 'json'
 require 'stringio'
+require 'google/cloud/firestore'
 
 db = Google::Cloud::Firestore.new(project: 'minits').collection('minits')
 
@@ -26,7 +27,7 @@ end
 post '/:id/sync.json' do |id|
   request.body.rewind
   minits = JSON.parse(request.body.read)
-  db.doc(id).set(minits, merge: true)
+  db.doc(id).set(minits)
 
   status :ok
 end
