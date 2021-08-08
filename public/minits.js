@@ -5,14 +5,13 @@ document.addEventListener('alpine:init', () => {
     text: null,
     start: null,
     minutes: [],
-    index: -1,
 
     async init() {
       const response = await fetch(`/${id}/minutes.json`)
-      const session = await response.json()
+      const minits = await response.json()
 
-      this.start = session.start ? DateTime.fromISO(session.start) : DateTime.now()
-      this.minutes = session.minutes.map((minute) => {
+      this.start = minits.start ? DateTime.fromISO(minits.start) : DateTime.now()
+      this.minutes = minits.minutes.map((minute) => {
         minute.time = DateTime.fromISO(minute.time)
         return minute
       })

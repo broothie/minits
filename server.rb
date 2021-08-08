@@ -5,7 +5,7 @@ require 'sinatra/reloader' if development?
 require 'json'
 require 'stringio'
 
-db = Google::Cloud::Firestore.new(project: 'minits').collection('sessions')
+db = Google::Cloud::Firestore.new(project: 'minits').collection('minits')
 
 get '/' do
   id = SecureRandom.urlsafe_base64(6)
@@ -16,7 +16,7 @@ end
 
 get '/:id' do |id|
   @id = id
-  erb :'index.html'
+  erb :'minits.html'
 end
 
 get '/:id/minutes.json' do |id|
@@ -25,18 +25,18 @@ end
 
 post '/:id/sync.json' do |id|
   request.body.rewind
-  session = JSON.parse(request.body.read)
-  db.doc(id).set(session, merge: true)
+  minits = JSON.parse(request.body.read)
+  db.doc(id).set(minits, merge: true)
 
   status :ok
 end
 
 get '/:id/raw.txt' do |id|
-  session = db.doc(id).get.data
-  start = Time.parse(session[:start])
+  minits = db.doc(id).get.data
+  start = Time.parse(minits[:start])
 
   txt = StringIO.new
-  session[:minutes].each do |minute|
+  minits[:minutes].each do |minute|
     time = Time.parse(minute[:time])
     diff = (time - start).floor
     txt.puts "#{(diff / 60).to_s.rjust(2, '0')}:#{(diff % 60).to_s.rjust(2, '0')} #{minute[:text]}"

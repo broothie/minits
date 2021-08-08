@@ -1,0 +1,37 @@
+<div class="min-vh-100" x-data="minits('<%= @id %>')">
+  <div class="container">
+    <div class="container col-sm-9">
+      <template x-for="minute in minutes">
+        <div class="row text-muted">
+          <div class="col-2 col-sm-1" x-text="offsetString(minute.time)"></div>
+          <div class="col-10 col-sm-11" x-text="minute.text"></div>
+        </div>
+      </template>
+
+      <div class="row mt-2 mb-2">
+        <div class="col-2 col-sm-1"></div>
+
+        <div class="col-10 col-sm-11">
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="minutes go here"
+              autofocus
+              x-model="text"
+              @keyup.enter="record">
+
+            <button class="btn btn-primary" @click="record" :disabled="!text">⏎</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-2 col-sm-1"></div>
+        <div class="col-10 col-sm-11">
+          <a class="text-muted" href="/<%= @id %>/raw.txt">download</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
