@@ -18,7 +18,7 @@ document.addEventListener('alpine:init', () => {
         return record
       })
 
-      setInterval(() => this.tick(), 1000)
+      setInterval(() => this.currentTime = DateTime.now(), 1000)
     },
 
     async record() {
@@ -32,7 +32,7 @@ document.addEventListener('alpine:init', () => {
     },
 
     async sync() {
-      this.status = 'saving'
+      this.status = 'saving...'
 
       const response = await fetch(`/${id}/sync`, {
         method: 'POST',
@@ -44,16 +44,6 @@ document.addEventListener('alpine:init', () => {
 
     formatOffset(time) {
       return time.diff(this.start).toFormat('mm:ss')
-    },
-
-    tick() {
-      this.currentTime = DateTime.now()
-    },
-
-    getCurrentOffset() {
-      if (!this.start) return null
-
-      return this.formatOffset(this.currentTime)
     }
   }))
 })

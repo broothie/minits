@@ -1,37 +1,53 @@
 <div x-data="minits('<%= @id %>')">
   <nav class="navbar sticky-top">
     <div class="container d-flex flex-row justify-content-between align-content-center">
-      <p><a href="/">minits</a></p>
-      <p><span class="text-muted" x-text="status"></span> • <a href="/<%= @id %>/minutes.txt">text</a> • <a href="/<%= @id %>/minutes.json">json</a></p>
+      <p>
+        <a href="/">minits</a>
+        •
+        <template x-if="status == 'saved'">
+          <span>saved</span>
+        </template>
+        <template x-if="status != 'saved'">
+          <a href="#" x-text="status" @click="sync"></a>
+        </template>
+      </p>
+
+      <p>
+        <a href="/<%= @id %>/minutes.txt">text</a>
+        •
+        <a href="/<%= @id %>/minutes.json">json</a>
+      </p>
     </div>
   </nav>
 
-  <div class="container">
-    <div class="container col-sm-9">
-      <template x-for="record in records">
-        <div class="row text-muted">
-          <div class="col-2 col-sm-1" x-text="formatOffset(record.time)"></div>
-          <div class="col-10 col-sm-11" x-text="record.text"></div>
-        </div>
-      </template>
+  <div class="container col-sm-9">
+    <template x-for="record in records">
+      <div class="row text-muted">
+        <div class="col-2 col-md-1 font-monospace" x-text="formatOffset(record.time)"></div>
+        <div class="col-10 col-md-11" x-text="record.text"></div>
+      </div>
+    </template>
 
-      <div class="row mt-2 mb-2 align-items-center">
-        <div class="col-2 col-sm-1 text-muted" x-text="getCurrentOffset"></div>
+    <div class="row mt-2 mb-2 align-items-center">
+      <div class="col-2 col-md-1 font-monospace text-muted" x-text="start && formatOffset(currentTime)"></div>
 
-        <div class="col-10 col-sm-11">
-          <div class="input-group input-group-sm">
-            <input
-              type="text"
-              class="form-control"
-              placeholder="record some minutes..."
-              autofocus
-              x-model="text"
-              @keyup.enter="record">
+      <div class="col-10 col-md-11">
+        <div class="input-group input-group-sm">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="record some minutes..."
+            autofocus
+            x-model="text"
+            @keyup.enter="record">
 
-            <button class="btn btn-primary" @click="record" :disabled="!text">⏎</button>
-          </div>
+          <button class="btn btn-primary" @click="record" :disabled="!text">⏎</button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/luxon@2.0.1/build/global/luxon.min.js" integrity="sha256-BdqBGuaawDzMtW2Wn9ISUuYKUY/A7d5NVcj6Ix3jwv8=" crossorigin="anonymous"></script>
+<script src="/minutes.js"></script>
+<script src="//unpkg.com/alpinejs"></script>
